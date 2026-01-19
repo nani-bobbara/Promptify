@@ -14,6 +14,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sidebar } from "./Sidebar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -63,6 +64,7 @@ export function Header({ userInfo }: HeaderProps) {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-4 ml-auto">
+                <ThemeToggle />
                 <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-muted-foreground hover:text-foreground hidden sm:flex">
                     <Bell className="w-4 h-4" />
                 </Button>
@@ -110,6 +112,6 @@ export function Header({ userInfo }: HeaderProps) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-        </header>
+        </header >
     );
 }

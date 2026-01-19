@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/Providers";
-import { Inter } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
+import { BRANDING } from "@/config";
 import "./globals.css";
 
 const inter = Inter({
@@ -10,9 +11,14 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+});
+
 export const metadata: Metadata = {
-  title: "PromptGen - AI Prompt Engineering Made Simple",
-  description: "Transform your ideas into perfect AI prompts. Generate optimized prompts for Midjourney, DALL-E, Sora, and more.",
+  title: `${BRANDING.name} - ${BRANDING.description}`,
+  description: BRANDING.description,
 };
 
 import { ReactNode } from "react";
@@ -23,10 +29,10 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${outfit.variable} font-sans antialiased`}>
         <Providers>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             {children}
             <Toaster />
           </ThemeProvider>

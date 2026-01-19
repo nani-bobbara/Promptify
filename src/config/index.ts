@@ -5,3 +5,4 @@ export * from './templates';
 export * from './styles';
 export * from './models';
 export * from './plans';
+export * from './branding';

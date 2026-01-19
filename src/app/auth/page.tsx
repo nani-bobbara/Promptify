@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Zap, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { BRANDING } from "@/config";
 
 export default function AuthPage() {
     const router = useRouter();
@@ -35,7 +36,7 @@ export default function AuthPage() {
                     },
                 });
                 if (error) throw error;
-                toast.success("Check your email to confirm your account!");
+                toast.success("Security check! Verify your email to continue.");
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
                     email,
@@ -46,7 +47,7 @@ export default function AuthPage() {
                 router.refresh();
             }
         } catch (error: any) {
-            toast.error(error.message || "Authentication failed");
+            toast.error(error.message || "Access denied");
         } finally {
             setIsLoading(false);
         }
@@ -63,38 +64,43 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="min-h-screen flex items-center justify-center bg-background p-6">
             {/* Background Effects */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+                <div className="absolute top-1/4 left-1/4 w-[100%] h-[100%] bg-primary/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-1/4 right-1/4 w-[100%] h-[100%] bg-accent/5 rounded-full blur-[120px]" />
             </div>
 
-            <div className="w-full max-w-md relative z-10">
+            <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in duration-500">
                 {/* Logo */}
-                <Link href="/" className="flex items-center justify-center gap-2 mb-8">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                        <Sparkles className="w-5 h-5 text-primary-foreground" />
+                <Link href="/" className="flex items-center justify-center gap-3 mb-12">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-primary/80 to-accent flex items-center justify-center shadow-lg shadow-primary/20">
+                        <Zap className="w-5 h-5 text-primary-foreground fill-current" />
                     </div>
-                    <span className="text-2xl font-bold text-foreground">PromptGen</span>
+                    <span className="text-2xl font-black tracking-tighter text-foreground">
+                        {BRANDING.logo.text.slice(0, -BRANDING.logo.highlight.length)}
+                        <span className="text-primary">{BRANDING.logo.highlight}</span>
+                    </span>
                 </Link>
 
                 {/* Auth Card */}
-                <div className="bg-card border border-border rounded-2xl p-8">
-                    <h1 className="text-2xl font-bold text-center mb-2">
-                        {isSignUp ? "Create your account" : "Welcome back"}
-                    </h1>
-                    <p className="text-muted-foreground text-center mb-6">
-                        {isSignUp ? "Start creating amazing prompts" : "Sign in to continue"}
-                    </p>
+                <div className="bg-card/40 backdrop-blur-xl border border-border/40 rounded-3xl p-8 shadow-2xl">
+                    <div className="text-center mb-8">
+                        <h1 className="text-2xl font-black tracking-tight text-foreground mb-2">
+                            {isSignUp ? "Initialize Account" : "Access Terminal"}
+                        </h1>
+                        <p className="text-sm font-medium text-muted-foreground">
+                            {isSignUp ? "Join the prompt engineering elite." : "Authenticate to resume architecting."}
+                        </p>
+                    </div>
 
                     {/* Google Sign In */}
                     <Button
                         variant="outline"
-                        className="w-full mb-6"
+                        className="w-full h-12 rounded-2xl mb-8 border-border/50 hover:bg-muted/50 font-bold"
                         onClick={handleGoogleSignIn}
                     >
-                        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                             <path
                                 fill="currentColor"
                                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -115,30 +121,31 @@ export default function AuthPage() {
                         Continue with Google
                     </Button>
 
-                    <div className="relative mb-6">
+                    <div className="relative mb-8">
                         <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-border" />
+                            <div className="w-full border-t border-border/30" />
                         </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                        <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground">
+                            <span className="bg-card px-3 py-1 rounded-full border border-border/30">Protocol Entry</span>
                         </div>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-5">
                         {isSignUp && (
-                            <div>
-                                <Label htmlFor="fullName">Full Name</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="fullName" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Full Name</Label>
                                 <Input
                                     id="fullName"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
                                     placeholder="John Doe"
                                     required={isSignUp}
+                                    className="h-12 rounded-2xl bg-muted/30 border-border/30"
                                 />
                             </div>
                         )}
-                        <div>
-                            <Label htmlFor="email">Email</Label>
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Identity (Email)</Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -146,10 +153,11 @@ export default function AuthPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
                                 required
+                                className="h-12 rounded-2xl bg-muted/30 border-border/30"
                             />
                         </div>
-                        <div>
-                            <Label htmlFor="password">Password</Label>
+                        <div className="space-y-2">
+                            <Label htmlFor="password" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Secret Key (Password)</Label>
                             <Input
                                 id="password"
                                 type="password"
@@ -158,27 +166,29 @@ export default function AuthPage() {
                                 placeholder="••••••••"
                                 required
                                 minLength={6}
+                                className="h-12 rounded-2xl bg-muted/30 border-border/30"
                             />
                         </div>
                         <Button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                            className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black tracking-tight shadow-xl shadow-primary/20 transition-all active:scale-95 mt-4"
                             disabled={isLoading}
                         >
-                            {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                            {isSignUp ? "Create Account" : "Sign In"}
+                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isSignUp ? "INITIALIZE" : "AUTHENTICATE")}
                         </Button>
                     </form>
 
-                    <p className="text-center text-sm text-muted-foreground mt-6">
-                        {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-                        <button
-                            onClick={() => setIsSignUp(!isSignUp)}
-                            className="text-primary hover:underline"
-                        >
-                            {isSignUp ? "Sign in" : "Sign up"}
-                        </button>
-                    </p>
+                    <div className="mt-8 text-center pt-6 border-t border-border/20">
+                        <p className="text-xs font-bold text-muted-foreground tracking-tight">
+                            {isSignUp ? "ALREADY AUTHENTICATED?" : "NO PROTOCOL ACCESS?"}{" "}
+                            <button
+                                onClick={() => setIsSignUp(!isSignUp)}
+                                className="text-primary hover:underline ml-1"
+                            >
+                                {isSignUp ? "SIGN IN" : "GENERATE IDENTITY"}
+                            </button>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

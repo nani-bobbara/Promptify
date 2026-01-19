@@ -14,7 +14,7 @@ import {
     Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PLAN_LIMITS } from "@/config";
+import { PLAN_LIMITS, BRANDING } from "@/config";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -52,7 +52,8 @@ export function Sidebar({ userInfo }: SidebarProps) {
                     </div>
                     {!collapsed && (
                         <span className="text-lg font-black tracking-tighter text-foreground">
-                            PROMPT<span className="text-primary">IFY</span>
+                            {BRANDING.logo.text.slice(0, -BRANDING.logo.highlight.length)}
+                            <span className="text-primary">{BRANDING.logo.highlight}</span>
                         </span>
                     )}
                 </Link>
