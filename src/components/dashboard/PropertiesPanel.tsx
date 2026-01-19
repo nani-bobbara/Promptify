@@ -27,7 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 
 interface PropertiesPanelProps {
-    template: SupportedTemplate;
+    template: SupportedTemplate | null;
     style: Style;
     parameters: Record<string, any>;
     onParamChange: (key: string, value: any) => void;
@@ -43,6 +43,15 @@ export function PropertiesPanel({
     onGenerate,
     isPending
 }: PropertiesPanelProps) {
+    if (!template) {
+        return (
+            <aside className="fixed right-0 top-16 bottom-0 w-80 border-l border-border bg-background/60 backdrop-blur-3xl hidden lg:flex flex-col z-30 items-center justify-center p-8 text-center">
+                <Sliders className="w-8 h-8 text-muted-foreground/20 mb-4" />
+                <p className="text-sm font-bold text-muted-foreground/40 uppercase tracking-widest">Select blueprint to view properties</p>
+            </aside>
+        );
+    }
+
     const renderControl = (schema: ParameterSchema) => {
         const labelEl = (
             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3 block">

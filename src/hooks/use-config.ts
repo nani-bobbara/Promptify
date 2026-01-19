@@ -4,7 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { SupportedTemplate, SupportedAIModel } from "@/types/dynamic-config";
 
-export function useDynamicConfig() {
+interface UseDynamicConfigOptions {
+    initialTemplates?: SupportedTemplate[];
+    initialModels?: SupportedAIModel[];
+}
+
+export function useDynamicConfig(options: UseDynamicConfigOptions = {}) {
     const supabase = createClient();
 
     const templatesQuery = useQuery({
@@ -14,11 +19,12 @@ export function useDynamicConfig() {
                 .from('supported_templates')
                 .select('*')
                 .eq('is_active', true)
-                .order('created_at', { ascending: true }); // Order by creation or add a rank column later
+                .order('created_at', { ascending: true });
 
             if (error) throw error;
             return data as SupportedTemplate[];
         },
+        initialData: options.initialTemplates,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
@@ -34,6 +40,7 @@ export function useDynamicConfig() {
             if (error) throw error;
             return data as SupportedAIModel[];
         },
+        initialData: options.initialModels,
         staleTime: 1000 * 60 * 60, // 1 hour
     });
 
