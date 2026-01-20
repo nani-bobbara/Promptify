@@ -3,13 +3,13 @@
 import { useState, useTransition } from "react";
 import { styles } from "@/config";
 import { useDynamicConfig } from "@/hooks/use-config";
-import { SupportedTemplate, SupportedAIModel } from "@/types/dynamic-config";
+import { SupportedTemplate, SupportedAIModel, Tier } from "@/types/dynamic-config";
 import { generatePrompt } from "@/app/actions/generate-prompt";
 import { toast } from "sonner";
-import { 
-    Loader2, 
-    Copy, 
-    Check, 
+import {
+    Loader2,
+    Copy,
+    Check,
     Sparkles,
     ImageIcon,
     FileText,
@@ -46,6 +46,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import { ParameterSchema } from "@/types/dynamic-config";
@@ -54,6 +55,10 @@ import { LucideIcon } from "lucide-react";
 interface PromptGeneratorProps {
     initialTemplates: SupportedTemplate[];
     initialModels: SupportedAIModel[];
+    subscription: {
+        tier: Tier;
+        usePersonalDefault: boolean;
+    } | null;
 }
 
 const categoryIcons: Record<string, LucideIcon> = {
@@ -63,7 +68,7 @@ const categoryIcons: Record<string, LucideIcon> = {
     'Utility': SettingsIcon
 };
 
-export function PromptGenerator({ initialTemplates, initialModels }: PromptGeneratorProps) {
+export function PromptGenerator({ initialTemplates, initialModels, subscription }: PromptGeneratorProps) {
     const { templates, models } = useDynamicConfig({
         initialTemplates,
         initialModels
@@ -73,6 +78,7 @@ export function PromptGenerator({ initialTemplates, initialModels }: PromptGener
     const [selectedTemplate, setSelectedTemplate] = useState<SupportedTemplate | null>(initialTemplates[0] || null);
     const [selectedStyle, setSelectedStyle] = useState(styles[0]);
     const [selectedModelId, setSelectedModelId] = useState<string>(initialModels[0]?.model_id || '');
+    const [usePersonalKey, setUsePersonalKey] = useState(subscription?.usePersonalDefault || false);
     const [inputPrompt, setInputPrompt] = useState("");
     const [outputPrompt, setOutputPrompt] = useState("");
     const [parameters, setParameters] = useState<Record<string, unknown>>(initialTemplates[0]?.default_params || {});
@@ -110,7 +116,8 @@ export function PromptGenerator({ initialTemplates, initialModels }: PromptGener
                 templateStructure: selectedTemplate.structure,
                 style: selectedStyle.name,
                 modelId: selectedModelId,
-                parameters
+                parameters,
+                usePersonalKey
             });
 
             if (result.error) {
@@ -130,7 +137,7 @@ export function PromptGenerator({ initialTemplates, initialModels }: PromptGener
     };
 
     const handleCopyOutput = () => {
-        const textToCopy = viewMode === "json" 
+        const textToCopy = viewMode === "json"
             ? JSON.stringify({ prompt: outputPrompt, template: selectedTemplate?.name, style: selectedStyle.name, timestamp: new Date().toISOString() }, null, 2)
             : outputPrompt;
         navigator.clipboard.writeText(textToCopy);
@@ -209,120 +216,137 @@ export function PromptGenerator({ initialTemplates, initialModels }: PromptGener
             {/* Left Panel - Configuration */}
             <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-border bg-muted/30 flex-shrink-0 lg:overflow-y-auto">
                 <div className="p-4 space-y-6 pb-8">
-                        {/* Template Selection */}
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-sm font-semibold text-foreground">Template</Label>
-                                {selectedTemplate?.help_text && (
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6">
-                                                <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" />
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-lg max-h-[80vh] overflow-hidden">
-                                            <DialogHeader>
-                                                <DialogTitle>{selectedTemplate.name} Guide</DialogTitle>
-                                                <DialogDescription>Tips for getting the best results</DialogDescription>
-                                            </DialogHeader>
-                                            <ScrollArea className="max-h-[50vh] pr-4">
-                                                <div className="prose prose-sm dark:prose-invert">
-                                                    <ReactMarkdown>{selectedTemplate.help_text}</ReactMarkdown>
-                                                </div>
-                                            </ScrollArea>
-                                        </DialogContent>
-                                    </Dialog>
-                                )}
-                            </div>
-                            <Select
-                                value={selectedTemplate?.id || ''}
-                                onValueChange={handleTemplateSelect}
-                            >
-                                <SelectTrigger className="h-11 bg-background border-border">
-                                    <div className="flex items-center gap-2">
-                                        <CategoryIcon className="w-4 h-4 text-primary" />
-                                        <SelectValue placeholder="Choose a template" />
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {templates.map((template) => {
-                                        const Icon = categoryIcons[template.category] || FileText;
-                                        return (
-                                            <SelectItem key={template.id} value={template.id}>
-                                                <div className="flex items-center gap-2">
-                                                    <Icon className="w-4 h-4 text-muted-foreground" />
-                                                    <span>{template.name}</span>
-                                                </div>
-                                            </SelectItem>
-                                        );
-                                    })}
-                                </SelectContent>
-                            </Select>
-                            {selectedTemplate && (
-                                <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
+                    {/* Template Selection */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-sm font-semibold text-foreground">Template</Label>
+                            {selectedTemplate?.help_text && (
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-6 w-6">
+                                            <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-lg max-h-[80vh] overflow-hidden">
+                                        <DialogHeader>
+                                            <DialogTitle>{selectedTemplate.name} Guide</DialogTitle>
+                                            <DialogDescription>Tips for getting the best results</DialogDescription>
+                                        </DialogHeader>
+                                        <ScrollArea className="max-h-[50vh] pr-4">
+                                            <div className="prose prose-sm dark:prose-invert">
+                                                <ReactMarkdown>{selectedTemplate.help_text}</ReactMarkdown>
+                                            </div>
+                                        </ScrollArea>
+                                    </DialogContent>
+                                </Dialog>
                             )}
                         </div>
-
-                        {/* AI Model Selection */}
-                        <div className="space-y-3">
-                            <Label className="text-sm font-semibold text-foreground">AI Model</Label>
-                            <Select value={selectedModelId} onValueChange={setSelectedModelId}>
-                                <SelectTrigger className="h-11 bg-background border-border">
-                                    <SelectValue placeholder="Choose AI model" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {models.map((model) => (
-                                        <SelectItem key={model.model_id} value={model.model_id}>
-                                            <div className="flex flex-col">
-                                                <span>{model.name}</span>
+                        <Select
+                            value={selectedTemplate?.id || ''}
+                            onValueChange={handleTemplateSelect}
+                        >
+                            <SelectTrigger className="h-11 bg-background border-border">
+                                <div className="flex items-center gap-2">
+                                    <CategoryIcon className="w-4 h-4 text-primary" />
+                                    <SelectValue placeholder="Choose a template" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {templates.map((template) => {
+                                    const Icon = categoryIcons[template.category] || FileText;
+                                    return (
+                                        <SelectItem key={template.id} value={template.id}>
+                                            <div className="flex items-center gap-2">
+                                                <Icon className="w-4 h-4 text-muted-foreground" />
+                                                <span>{template.name}</span>
                                             </div>
                                         </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {/* Visual Style */}
-                        <div className="space-y-3">
-                            <Label className="text-sm font-semibold text-foreground">Visual Style</Label>
-                            <TooltipProvider>
-                                <div className="flex flex-wrap gap-2">
-                                    {styles.map((style) => (
-                                        <Tooltip key={style.id}>
-                                            <TooltipTrigger asChild>
-                                                <button
-                                                    onClick={() => setSelectedStyle(style)}
-                                                    className={cn(
-                                                        "w-8 h-8 rounded-lg transition-all border-2",
-                                                        style.previewColor ? `bg-gradient-to-br ${style.previewColor}` : "bg-muted",
-                                                        selectedStyle.id === style.id
-                                                            ? "border-primary ring-2 ring-primary/20 scale-110"
-                                                            : "border-transparent hover:border-border hover:scale-105"
-                                                    )}
-                                                />
-                                            </TooltipTrigger>
-                                            <TooltipContent side="top">
-                                                <p className="font-medium">{style.name}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    ))}
-                                </div>
-                            </TooltipProvider>
-                            <p className="text-xs text-muted-foreground">
-                                Selected: <span className="font-medium text-foreground">{selectedStyle.name}</span>
-                            </p>
-                        </div>
-
-                        {/* Template Parameters */}
-                        {selectedTemplate?.param_schema && selectedTemplate.param_schema.length > 0 && (
-                            <div className="space-y-4 pt-4 border-t border-border">
-                                <Label className="text-sm font-semibold text-foreground">Parameters</Label>
-                                <div className="space-y-4">
-                                    {selectedTemplate.param_schema.map(schema => renderControl(schema))}
-                                </div>
-                            </div>
+                                    );
+                                })}
+                            </SelectContent>
+                        </Select>
+                        {selectedTemplate && (
+                            <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
                         )}
                     </div>
+
+                    {/* AI Model Selection */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-sm font-semibold text-foreground">AI Model</Label>
+                            {subscription?.tier.features.byok_enabled && (
+                                <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-accent/10 border border-accent/20">
+                                    <span className="text-[10px] font-bold uppercase text-accent leading-none">BYOK</span>
+                                    <Switch
+                                        checked={usePersonalKey}
+                                        onCheckedChange={setUsePersonalKey}
+                                        disabled={isPending}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <Select value={selectedModelId} onValueChange={setSelectedModelId}>
+                            <SelectTrigger className="h-11 bg-background border-border">
+                                <SelectValue placeholder="Choose AI model" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {models.map((model) => (
+                                    <SelectItem key={model.model_id} value={model.model_id}>
+                                        <div className="flex flex-col">
+                                            <span>{model.name}</span>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {!subscription?.tier.features.byok_enabled && (
+                            <p className="text-[10px] text-muted-foreground italic">
+                                Upgrade to Premium to use your own API keys.
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Visual Style */}
+                    <div className="space-y-3">
+                        <Label className="text-sm font-semibold text-foreground">Visual Style</Label>
+                        <TooltipProvider>
+                            <div className="flex flex-wrap gap-2">
+                                {styles.map((style) => (
+                                    <Tooltip key={style.id}>
+                                        <TooltipTrigger asChild>
+                                            <button
+                                                onClick={() => setSelectedStyle(style)}
+                                                className={cn(
+                                                    "w-8 h-8 rounded-lg transition-all border-2",
+                                                    style.previewColor ? `bg-gradient-to-br ${style.previewColor}` : "bg-muted",
+                                                    selectedStyle.id === style.id
+                                                        ? "border-primary ring-2 ring-primary/20 scale-110"
+                                                        : "border-transparent hover:border-border hover:scale-105"
+                                                )}
+                                            />
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top">
+                                            <p className="font-medium">{style.name}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                ))}
+                            </div>
+                        </TooltipProvider>
+                        <p className="text-xs text-muted-foreground">
+                            Selected: <span className="font-medium text-foreground">{selectedStyle.name}</span>
+                        </p>
+                    </div>
+
+                    {/* Template Parameters */}
+                    {selectedTemplate?.param_schema && selectedTemplate.param_schema.length > 0 && (
+                        <div className="space-y-4 pt-4 border-t border-border">
+                            <Label className="text-sm font-semibold text-foreground">Parameters</Label>
+                            <div className="space-y-4">
+                                {selectedTemplate.param_schema.map(schema => renderControl(schema))}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Center Panel - Input & Output */}
@@ -357,7 +381,7 @@ export function PromptGenerator({ initialTemplates, initialModels }: PromptGener
                             </Button>
                         )}
                     </div>
-                    
+
                     <div className="flex-1 min-h-[200px] relative">
                         <Textarea
                             placeholder="Example: A majestic dragon flying over a medieval castle at sunset, with dramatic lighting and epic atmosphere..."
@@ -426,7 +450,7 @@ export function PromptGenerator({ initialTemplates, initialModels }: PromptGener
                                         JSON
                                     </button>
                                 </div>
-                                
+
                                 {/* Copy Button */}
                                 <Button
                                     variant="outline"

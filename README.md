@@ -15,47 +15,27 @@ This project is a monorepo containing the Next.js application and Supabase datab
 - **BYOK Support**: Unlimited usage via personal API key fallback.
 - **Searchable History**: Automatic retention of all generated prompts.
 
-## 🚀 Quick Start (Local Development)
+## 🚀 Getting Started
 
-### 1. Prerequisites
-- Node.js 18+
-- Supabase CLI (optional)
-- Stripe CLI (for webhook testing)
+> **⚠️ Important**: For detailed setup, environment variables, and Stripe configuration, please refer to the **[Deployment Guide](docs/DEPLOYMENT.md)**.
 
-### 2. Installation
-```bash
-# Clone the repository
-git clone <repo-url>
-cd prompt-gen
-
-# Install dependencies (Next.js)
-cd prompt-gen-nextjs
-npm install
-```
-
-### 3. Environment Setup
-Create a `.env.local` in `/prompt-gen-nextjs`:
-```env
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-GOOGLE_GENERATIVE_AI_API_KEY=your-gemini-key
-OPENAI_API_KEY=your-openai-key
-STRIPE_SECRET_KEY=your-stripe-secret
-STRIPE_WEBHOOK_SECRET=your-wh-secret
-```
-
-### 4. Database Setup
-Run the master migration file in your Supabase SQL Editor:
-`supabase/migrations/20260118061718_92c8de34-7ae7-48df-9784-756c395f50aa.sql`
-
-### 5. Running
-```bash
-npm run dev
-```
+### Quick Start
+1.  **Clone & Install**:
+    ```bash
+    git clone <repo-url>
+    cd promptify
+    npm install
+    ```
+2.  **Setup Environment**: See [Deployment Guide](docs/DEPLOYMENT.md) for `.env.local` template.
+3.  **Run Locally**:
+    ```bash
+    npm run dev
+    ```
 
 ## 📖 Documentation
-- [Developer Architecture Guide](ARCHITECTURE.md)
-- [User Guide](USER_GUIDE.md)
+- [Deployment & Configuration](docs/DEPLOYMENT.md) — **Single Source of Truth** for setup.
+- [Architecture Guide](docs/ARCHITECTURE.md) — Technical details (RLS, Flows).
+- [User Guide](docs/USER_GUIDE.md) — End-user manual.
 
 ## ⚖️ License
 MIT

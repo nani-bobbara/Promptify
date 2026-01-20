@@ -49,7 +49,7 @@ export async function createPortalSession() {
     if (!user) throw new Error("Unauthorized");
 
     const { data: subscription } = await supabase
-        .from('subscriptions')
+        .from('user_subscriptions')
         .select('stripe_customer_id')
         .eq('user_id', user.id)
         .single();

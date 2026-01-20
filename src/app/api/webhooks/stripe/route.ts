@@ -1,8 +1,8 @@
 import { Stripe } from 'stripe';
-import { createClient } from '@/lib/supabase/server';
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import { NextResponse } from 'next/server';
+import { StripeService } from '@/lib/stripe-service';
 
 export async function POST(req: Request) {
     const body = await req.text();
@@ -18,52 +18,33 @@ export async function POST(req: Request) {
         );
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`Webhook Error: ${message}`);
         return new NextResponse(`Webhook Error: ${message}`, { status: 400 });
     }
 
-    const session = event.data.object as Stripe.Checkout.Session;
-    const supabase = await createClient();
-
-    if (event.type === 'checkout.session.completed') {
-        const subscriptionResponse = await stripe.subscriptions.retrieve(session.subscription as string);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const subscriptionData = subscriptionResponse as any;
-        const priceId = subscriptionData.items.data[0].price.id;
-
-        // Find tier by price_id
-        const { data: tier } = await supabase
-            .from('tiers')
-            .select('id, quota')
-            .eq('stripe_price_id', priceId)
-            .single();
-
-        if (tier) {
-            const periodEnd = subscriptionData.current_period_end 
-                ? new Date(subscriptionData.current_period_end * 1000).toISOString()
-                : null;
-            await supabase
-                .from('subscriptions')
-                .update({
-                    stripe_subscription_id: subscriptionData.id,
-                    stripe_customer_id: subscriptionData.customer as string,
-                    current_tier: tier.id,
-                    status: 'active',
-                    quota_reset_at: periodEnd
-                })
-                .eq('user_id', session.client_reference_id);
+    try {
+        switch (event.type) {
+            case 'checkout.session.completed':
+                await StripeService.handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+                break;
+            case 'customer.subscription.updated':
+                await StripeService.handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+                break;
+            case 'customer.subscription.deleted':
+                await StripeService.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+                break;
+            case 'product.created':
+            case 'product.updated':
+            case 'price.created':
+            case 'price.updated':
+                await StripeService.handleProductOrPriceUpdate(event);
+                break;
+            default:
+                console.log(`Unhandled event type ${event.type}`);
         }
-    }
-
-    if (event.type === 'customer.subscription.deleted') {
-        // Downgrade to free
-        await supabase
-            .from('subscriptions')
-            .update({
-                current_tier: 'free',
-                status: 'canceled',
-                quota_reset_at: null
-            })
-            .eq('stripe_customer_id', session.customer as string);
+    } catch (error) {
+        console.error('Error processing webhook:', error);
+        return new NextResponse('Internal Server Error', { status: 500 });
     }
 
     return new NextResponse(null, { status: 200 });

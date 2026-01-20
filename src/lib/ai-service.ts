@@ -13,12 +13,16 @@ export interface AIProviderRequest {
 
 export class AIProviderService {
     static async callGemini(req: AIProviderRequest): Promise<AIProviderResponse> {
+        // The endpoint already includes 'generateContent' from the DB
         const url = `${req.endpoint}?key=${req.apiKey}`;
 
         try {
             const response = await fetch(url, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": req.apiKey
+                },
                 body: JSON.stringify({
                     contents: [
                         { role: "user", parts: [{ text: `${req.systemPrompt}\n\nTopic: ${req.userPrompt}` }] }
@@ -79,7 +83,7 @@ export class AIProviderService {
 
     static async generate(provider: string, req: AIProviderRequest): Promise<AIProviderResponse> {
         switch (provider) {
-            case 'google':
+            case 'gemini':
                 return this.callGemini(req);
             case 'openai':
                 return this.callOpenAI(req);

@@ -8,7 +8,6 @@ import {
     Video as VideoIcon,
     Settings,
     ArrowRight,
-    ArrowLeft,
     Sparkles,
     Megaphone,
     Code,
@@ -31,64 +30,64 @@ interface Template {
 }
 
 // Category styling configuration with colors
-const categoryConfig: Record<string, { 
-    icon: LucideIcon; 
-    gradient: string; 
+const categoryConfig: Record<string, {
+    icon: LucideIcon;
+    gradient: string;
     iconColor: string;
     bgColor: string;
     borderColor: string;
     accentGradient: string;
 }> = {
-    'Image': { 
-        icon: ImageIcon, 
+    'Image': {
+        icon: ImageIcon,
         gradient: 'from-violet-500 to-purple-600',
         iconColor: 'text-violet-600 dark:text-violet-400',
         bgColor: 'bg-violet-100 dark:bg-violet-500/20',
         borderColor: 'border-violet-200 dark:border-violet-500/30',
         accentGradient: 'from-violet-500/20 via-purple-500/10 to-transparent'
     },
-    'Video': { 
-        icon: VideoIcon, 
+    'Video': {
+        icon: VideoIcon,
         gradient: 'from-rose-500 to-pink-600',
         iconColor: 'text-rose-600 dark:text-rose-400',
         bgColor: 'bg-rose-100 dark:bg-rose-500/20',
         borderColor: 'border-rose-200 dark:border-rose-500/30',
         accentGradient: 'from-rose-500/20 via-pink-500/10 to-transparent'
     },
-    'Text': { 
-        icon: FileText, 
+    'Text': {
+        icon: FileText,
         gradient: 'from-emerald-500 to-teal-600',
         iconColor: 'text-emerald-600 dark:text-emerald-400',
         bgColor: 'bg-emerald-100 dark:bg-emerald-500/20',
         borderColor: 'border-emerald-200 dark:border-emerald-500/30',
         accentGradient: 'from-emerald-500/20 via-teal-500/10 to-transparent'
     },
-    'Utility': { 
-        icon: Settings, 
+    'Utility': {
+        icon: Settings,
         gradient: 'from-amber-500 to-orange-600',
         iconColor: 'text-amber-600 dark:text-amber-400',
         bgColor: 'bg-amber-100 dark:bg-amber-500/20',
         borderColor: 'border-amber-200 dark:border-amber-500/30',
         accentGradient: 'from-amber-500/20 via-orange-500/10 to-transparent'
     },
-    'Marketing': { 
-        icon: Megaphone, 
+    'Marketing': {
+        icon: Megaphone,
         gradient: 'from-blue-500 to-cyan-600',
         iconColor: 'text-blue-600 dark:text-blue-400',
         bgColor: 'bg-blue-100 dark:bg-blue-500/20',
         borderColor: 'border-blue-200 dark:border-blue-500/30',
         accentGradient: 'from-blue-500/20 via-cyan-500/10 to-transparent'
     },
-    'Code': { 
-        icon: Code, 
+    'Code': {
+        icon: Code,
         gradient: 'from-slate-500 to-gray-600',
         iconColor: 'text-slate-600 dark:text-slate-400',
         bgColor: 'bg-slate-100 dark:bg-slate-500/20',
         borderColor: 'border-slate-200 dark:border-slate-500/30',
         accentGradient: 'from-slate-500/20 via-gray-500/10 to-transparent'
     },
-    'Design': { 
-        icon: PenTool, 
+    'Design': {
+        icon: PenTool,
         gradient: 'from-fuchsia-500 to-pink-600',
         iconColor: 'text-fuchsia-600 dark:text-fuchsia-400',
         bgColor: 'bg-fuchsia-100 dark:bg-fuchsia-500/20',
@@ -121,7 +120,7 @@ export function TemplatesSection() {
                 .select('id, category, name, description, structure, min_tier')
                 .eq('is_active', true)
                 .limit(6);
-            
+
             if (data) {
                 setTemplates(data);
             }
@@ -133,7 +132,7 @@ export function TemplatesSection() {
     // Auto-scroll carousel
     useEffect(() => {
         if (isPaused || templates.length === 0) return;
-        
+
         const interval = setInterval(() => {
             setActiveIndex((prev) => (prev + 1) % templates.length);
         }, 4000);
@@ -174,8 +173,8 @@ export function TemplatesSection() {
     const isBasic = activeTemplate.min_tier === 'basic';
 
     return (
-        <section 
-            id="templates" 
+        <section
+            id="templates"
             className="py-24 md:py-32 relative overflow-hidden"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
@@ -183,7 +182,7 @@ export function TemplatesSection() {
             {/* Dynamic gradient background based on active template */}
             <div className={`absolute inset-0 bg-gradient-to-br ${config.accentGradient} transition-all duration-700 pointer-events-none`} />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background pointer-events-none" />
-            
+
             <div className="container mx-auto px-6 relative z-10">
                 {/* Section Header */}
                 <div className="text-center mb-12 md:mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -203,13 +202,13 @@ export function TemplatesSection() {
                 <div className="max-w-5xl mx-auto">
                     <div className="relative">
                         {/* Main Carousel Card */}
-                        <div 
+                        <div
                             key={activeTemplate.id}
                             className="relative rounded-3xl bg-card dark:bg-card/80 border border-border/40 overflow-hidden shadow-2xl shadow-primary/5 transition-all duration-500"
                         >
                             {/* Gradient accent bar */}
                             <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${config.gradient}`} />
-                            
+
                             <div className="grid md:grid-cols-2 gap-0">
                                 {/* Left side - Template Info */}
                                 <div className="p-8 md:p-12 flex flex-col justify-center">
@@ -218,18 +217,17 @@ export function TemplatesSection() {
                                         <div className={`w-14 h-14 rounded-2xl ${config.bgColor} ${config.borderColor} border flex items-center justify-center`}>
                                             <Icon className={`w-7 h-7 ${config.iconColor}`} />
                                         </div>
-                                        
+
                                         {/* Category & tier badges */}
                                         <div className="flex flex-col gap-1">
                                             <span className={`text-xs font-semibold px-3 py-1 rounded-full w-fit ${config.bgColor} ${config.iconColor}`}>
                                                 {activeTemplate.category}
                                             </span>
                                             {(isPro || isBasic) && (
-                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${
-                                                    isPro 
-                                                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' 
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${isPro
+                                                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
                                                         : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                                                }`}>
+                                                    }`}>
                                                     {isPro ? 'PRO' : 'BASIC'}
                                                 </span>
                                             )}
@@ -296,18 +294,16 @@ export function TemplatesSection() {
                                 <button
                                     key={template.id}
                                     onClick={() => goToSlide(index)}
-                                    className={`group relative h-2 rounded-full transition-all duration-300 ${
-                                        index === activeIndex 
-                                            ? 'w-8' 
+                                    className={`group relative h-2 rounded-full transition-all duration-300 ${index === activeIndex
+                                            ? 'w-8'
                                             : 'w-2 hover:w-4'
-                                    }`}
+                                        }`}
                                     aria-label={`Go to ${template.name}`}
                                 >
-                                    <div className={`absolute inset-0 rounded-full transition-all duration-300 ${
-                                        index === activeIndex 
-                                            ? `bg-gradient-to-r ${dotConfig.gradient}` 
+                                    <div className={`absolute inset-0 rounded-full transition-all duration-300 ${index === activeIndex
+                                            ? `bg-gradient-to-r ${dotConfig.gradient}`
                                             : 'bg-muted-foreground/20 dark:bg-muted-foreground/30 group-hover:bg-muted-foreground/40 dark:group-hover:bg-muted-foreground/50'
-                                    }`} />
+                                        }`} />
                                 </button>
                             );
                         })}
@@ -322,11 +318,10 @@ export function TemplatesSection() {
                                 <button
                                     key={template.id}
                                     onClick={() => goToSlide(index)}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-300 ${
-                                        index === activeIndex 
-                                            ? `${thumbConfig.bgColor} ${thumbConfig.borderColor} border-2` 
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-300 ${index === activeIndex
+                                            ? `${thumbConfig.bgColor} ${thumbConfig.borderColor} border-2`
                                             : 'bg-card/50 dark:bg-card/40 border-border/40 dark:border-border/30 hover:border-border dark:hover:border-border/60 hover:bg-muted/50 dark:hover:bg-muted/30'
-                                    }`}
+                                        }`}
                                 >
                                     <ThumbIcon className={`w-4 h-4 ${index === activeIndex ? thumbConfig.iconColor : 'text-muted-foreground'}`} />
                                     <span className={`text-xs font-medium ${index === activeIndex ? 'text-foreground' : 'text-muted-foreground'}`}>

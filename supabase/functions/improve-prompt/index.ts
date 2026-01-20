@@ -26,6 +26,7 @@ interface ValidatedInput {
   styleDescription: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function validateAndSanitizeInput(body: any): { valid: boolean; data?: ValidatedInput; error?: string } {
   // Check required fields
   if (!body.topic || typeof body.topic !== "string") {

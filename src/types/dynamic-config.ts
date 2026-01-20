@@ -37,3 +37,24 @@ export interface SupportedAIModel {
     env_key: string;
     is_active: boolean;
 }
+
+export interface TierFeatures {
+    prompts_included: number;
+    tokens_included: number;
+    byok_enabled: boolean;
+    json_export: boolean;
+    template_access: string;
+    variations_limit?: number;
+    // New features can be added here without DB schema changes
+}
+
+export interface Tier {
+    id: string;
+    name: string;
+    price: number;
+    quota: number; // Kept for backward compat, should match features.prompts_included
+    stripe_price_id: string | null;
+    stripe_product_id: string | null;
+    description: string | null;
+    features: TierFeatures;
+}

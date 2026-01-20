@@ -94,3 +94,24 @@ export async function getApiKeyStatus(): Promise<{ [key: string]: boolean }> {
 
     return status;
 }
+export async function updateByokSettings(usePersonalDefault: boolean): Promise<ApiKeyResult> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    const { error } = await supabase
+        .from("subscriptions")
+        .update({ use_personal_keys_default: usePersonalDefault })
+        .eq("user_id", user.id);
+
+    if (error) {
+        console.error("Update BYOK settings error:", error);
+        return { success: false, error: "Failed to update settings" };
+    }
+
+    revalidatePath("/dashboard/settings");
+    return { success: true };
+}

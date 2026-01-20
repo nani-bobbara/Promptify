@@ -1,4 +1,4 @@
-import { Layers, Zap, Palette, Sparkles, Wand2, History, Key, Image } from "lucide-react";
+import { Layers, Palette, Sparkles, Wand2, History, Key, Image } from "lucide-react";
 
 const features = [
     {

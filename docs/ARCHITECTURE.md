@@ -25,37 +25,43 @@ PromptGen follows a modern Serverless architecture using **Next.js 14 (App Route
 
 ### 2.2 Repository Structure
 ```text
-prompt-gen/
-├── prompt-gen-nextjs/      # Next.js Application
-│   ├── src/
-│   │   ├── app/            # App Router & Server Actions
-│   │   ├── components/     # UI Components (Dashboard, Landing, Settings)
-│   │   ├── hooks/          # React Query hooks for dynamic config
-│   │   ├── lib/            # Shared utilities (Stripe, Supabase clients)
-│   │   └── types/          # TypeScript definitions
-└── supabase/
-    └── migrations/         # Consolidated SQL Master Schema
+promptify/
+├── .github/            # GitHub Actions (CI/CD)
+├── docs/               # Architecture & Guides
+├── public/             # Static Assets
+├── src/
+│   ├── app/            # App Router & Server Actions
+│   ├── components/     # UI Components (Dashboard, Landing, Settings)
+│   ├── hooks/          # React Query hooks
+│   ├── lib/            # Shared utilities (Stripe, Supabase, AI)
+│   └── types/          # TypeScript definitions
+├── supabase/
+│   ├── migrations/     # SQL Master Schema and Migrations
+│   └── functions/      # Edge Functions
+├── .env.local          # Environment Variables
+├── next.config.ts      # Next.js Config
+└── package.json        # Dependencies
 ```
 
 ---
 
 ## 3. Database Layer (Supabase)
 
-The core logic is stored in a **single consolidated migration file** (`20260118061718_92c8de34-7ae7-48df-9784-756c395f50aa.sql`).
+The core logic is stored in a **single consolidated migration file** (`20260120000000_consolidated_schema.sql`).
 
 ### Core Tables
 | Table | Description |
 |-------|-------------|
-| `profiles` | User profile data. |
-| `subscriptions` | Tracks plan tier, usage quotas, and Stripe IDs. |
-| `tiers` | Definition of plans: Free ($0), Basic ($2), Pro ($5). |
+| `user_profiles` | User profile data (replacing `profiles`). |
+| `user_subscriptions` | Tracks plan tier, usage quotas, and Stripe IDs. |
+| `subscription_tiers` | Cached definition of plans: Free, Basic, Pro. |
 | `supported_templates`| Dynamic prompt structures and parameter schemas. |
-| `supported_ai_models`| Registered models (Gemini Pro, GPT-4o, etc). |
-| `user_api_keys` | Encrypted user keys for BYOK fallback. |
-| `prompts` | User prompt generation history. |
+| `supported_ai_models`| Registered models (Gemini 3 Flash, GPT-4o). |
+| `user_api_keys` | Encrypted user keys for BYOK fallback (PGCrypto). |
+| `user_prompts` | History with multimodal `context_data` & structured output. |
 
 ### RLS (Row Level Security)
-- Users can only read/write their own profiles, subscriptions, and prompts.
+- Users can only read/write their own user_profiles, user_subscriptions, and user_prompts.
 - Metadata tables (`tiers`, `templates`, `models`) are globally readable but only writeable by the system.
 
 ---
@@ -81,32 +87,9 @@ The core logic is stored in a **single consolidated migration file** (`202601180
 
 ---
 
-## 5. Deployment Guide
+## 5. Deployment & Configuration
 
-### 5.1 Prerequisites
-1. **Supabase Project**: Create a new project.
-2. **Stripe Account**: Create products and prices for Basic ($2) and Pro ($5).
-
-### 5.2 Step-by-Step Deployment
-1. **Database Setup**:
-   - Copy the content of `supabase/migrations/92c8de34-7ae7-48df-9784-756c395f50aa.sql` into the Supabase SQL Editor and run it.
-2. **Environment Variables**:
-   Add the following to Vercel/Local `.env`:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=...
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-   GOOGLE_GENERATIVE_AI_API_KEY=...
-   OPENAI_API_KEY=...
-   STRIPE_SECRET_KEY=...
-   STRIPE_WEBHOOK_SECRET=...
-   NEXT_PUBLIC_APP_URL=...
-   ```
-3. **Deploy to Vercel**:
-   - Connect your repo.
-   - Use `npm run build`.
-   - Ensure the `NEXT_PUBLIC_*` variables are set.
-
----
+> Please refer to the **[Deployment Guide](DEPLOYMENT.md)** for detailed environment setup, Stripe configuration, and database migration steps.
 
 ## 6. Developer Workflows
 - **Adding a Template**: Insert a new row into `supported_templates` via Supabase Dashboard. The UI will automatically render it.

@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { 
-    Zap, 
-    ArrowRight, 
-    Sparkles, 
-    Wand2, 
-    Image as ImageIcon, 
-    Layers, 
-    Clock, 
+import {
+    Zap,
+    ArrowRight,
+    Sparkles,
+    Wand2,
+    Layers,
+    Clock,
     Palette,
     ChevronLeft,
     ChevronRight,
@@ -78,7 +77,7 @@ export function HeroSection() {
     // Auto-rotate slides
     useEffect(() => {
         if (isPaused) return;
-        
+
         const interval = setInterval(() => {
             setActiveIndex((prev) => (prev + 1) % heroSlides.length);
         }, 5000);
@@ -102,7 +101,7 @@ export function HeroSection() {
     const BadgeIcon = activeSlide.badgeIcon;
 
     return (
-        <section 
+        <section
             className="relative min-h-[90vh] flex items-center justify-center pt-24 pb-16 overflow-hidden"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
@@ -116,7 +115,7 @@ export function HeroSection() {
             <div className="container mx-auto px-6 relative z-10">
                 <div className="max-w-4xl mx-auto text-center">
                     {/* Animated Badge */}
-                    <div 
+                    <div
                         key={`badge-${activeSlide.id}`}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 dark:bg-primary/15 border border-primary/20 mb-8 animate-in fade-in slide-in-from-top-4 duration-500"
                     >
@@ -125,7 +124,7 @@ export function HeroSection() {
                     </div>
 
                     {/* Animated Headline */}
-                    <h1 
+                    <h1
                         key={`headline-${activeSlide.id}`}
                         className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-500"
                     >
@@ -136,7 +135,7 @@ export function HeroSection() {
                     </h1>
 
                     {/* Animated Description */}
-                    <p 
+                    <p
                         key={`desc-${activeSlide.id}`}
                         className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-500"
                     >
@@ -190,18 +189,16 @@ export function HeroSection() {
                                 <button
                                     key={slide.id}
                                     onClick={() => goToSlide(index)}
-                                    className={`relative h-2 rounded-full transition-all duration-300 ${
-                                        index === activeIndex 
-                                            ? 'w-10' 
+                                    className={`relative h-2 rounded-full transition-all duration-300 ${index === activeIndex
+                                            ? 'w-10'
                                             : 'w-2 hover:w-4'
-                                    }`}
+                                        }`}
                                     aria-label={`Go to slide ${index + 1}`}
                                 >
-                                    <div className={`absolute inset-0 rounded-full transition-all duration-500 ${
-                                        index === activeIndex 
-                                            ? `bg-gradient-to-r ${slide.gradient}` 
+                                    <div className={`absolute inset-0 rounded-full transition-all duration-500 ${index === activeIndex
+                                            ? `bg-gradient-to-r ${slide.gradient}`
                                             : 'bg-muted-foreground/20 dark:bg-muted-foreground/30 hover:bg-muted-foreground/40 dark:hover:bg-muted-foreground/50'
-                                    }`} />
+                                        }`} />
                                 </button>
                             ))}
                         </div>

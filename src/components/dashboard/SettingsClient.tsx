@@ -20,7 +20,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { saveApiKey, deleteApiKey } from "@/app/actions/manage-api-keys";
+import { Switch } from "@/components/ui/switch";
+import { saveApiKey, deleteApiKey, updateByokSettings } from "@/app/actions/manage-api-keys";
 import { createCheckoutSession, createPortalSession } from "@/app/actions/stripe";
 import { toast } from "sonner";
 import { useDynamicConfig } from "@/hooks/use-config";
@@ -29,14 +30,20 @@ interface SettingsClientProps {
     userEmail: string;
     userName: string;
     keyStatus: { [key: string]: boolean };
+    priceBasicId: string;
+    priceProId: string;
     subscription: {
         tierName: string;
         quotaUsed: number;
         quotaLimit: number;
+        tierFeatures: {
+            byok_enabled: boolean;
+        };
+        usePersonalDefault: boolean;
     };
 }
 
-export function SettingsClient({ userEmail, userName, keyStatus, subscription }: SettingsClientProps) {
+export function SettingsClient({ userEmail, userName, keyStatus, priceProId, subscription }: SettingsClientProps) {
     const { models, isLoadingModels, modelsError } = useDynamicConfig();
     const [keys, setKeys] = useState<{ [key: string]: string }>({});
     const [isPending, startTransition] = useTransition();
@@ -86,6 +93,22 @@ export function SettingsClient({ userEmail, userName, keyStatus, subscription }:
                 toast.success("API key deleted");
             } else {
                 toast.error(result.error || "Failed to delete key");
+            }
+        });
+    };
+
+    const handleToggleByok = (checked: boolean) => {
+        if (!subscription.tierFeatures.byok_enabled && checked) {
+            toast.error("BYOK is a Premium feature. Please upgrade to enable.");
+            return;
+        }
+
+        startTransition(async () => {
+            const result = await updateByokSettings(checked);
+            if (result.success) {
+                toast.success(checked ? "Prioritizing personal keys" : "Prioritizing platform keys");
+            } else {
+                toast.error(result.error || "Failed to update settings");
             }
         });
     };
@@ -153,14 +176,31 @@ export function SettingsClient({ userEmail, userName, keyStatus, subscription }:
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-6">
-                                <div className="bg-primary/10 border border-primary/20 rounded-md p-4 flex gap-3 text-sm text-primary mb-4">
+                                <div className="bg-primary/10 border border-primary/20 rounded-md p-4 flex gap-3 text-sm text-primary mb-6">
                                     <AlertCircle className="w-5 h-5 flex-shrink-0" />
                                     <div>
-                                        <p className="font-semibold mb-1">Why add your own keys?</p>
+                                        <p className="font-semibold mb-1">How BYOK works</p>
                                         <p className="text-muted-foreground">
-                                            If you exceed your monthly plan limit, the system will automatically use your personal API keys to continue generating prompts without interruption.
+                                            {subscription.tierFeatures.byok_enabled
+                                                ? "You have Premium BYOK access. You can choose to use your own keys for every generation, or use them as an automatic fallback when your monthly quota is reached."
+                                                : "BYOK is currently disabled for your plan. Upgrade to Premium to use your own API keys for unlimited generation."
+                                            }
                                         </p>
                                     </div>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-muted/20 mb-8">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-base font-semibold">Prioritize Personal Keys</Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Always use your own API keys when available, bypassing platform quota.
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        checked={subscription.usePersonalDefault}
+                                        onCheckedChange={handleToggleByok}
+                                        disabled={!subscription.tierFeatures.byok_enabled || isPending}
+                                    />
                                 </div>
 
                                 {isLoadingModels ? (
@@ -274,7 +314,7 @@ export function SettingsClient({ userEmail, userName, keyStatus, subscription }:
                                     </div>
                                     {subscription.tierName === 'Free' ? (
                                         <Button onClick={() => {
-                                            toast.promise(createCheckoutSession('price_pro_placeholder_id'), {
+                                            toast.promise(createCheckoutSession(priceProId || 'price_pro_placeholder_id'), {
                                                 loading: 'Redirecting to checkout...',
                                                 error: 'Failed to start checkout'
                                             });
@@ -300,7 +340,7 @@ export function SettingsClient({ userEmail, userName, keyStatus, subscription }:
                                         <h4 className="font-bold mb-2">Free</h4>
                                         <p className="text-2xl font-bold mb-4">$0<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                                         <ul className="text-sm space-y-2 mb-4">
-                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> 50 Prompts/mo</li>
+                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> 10 Prompts/mo</li>
                                             <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> Basic Patterns</li>
                                         </ul>
                                     </div>
@@ -310,19 +350,19 @@ export function SettingsClient({ userEmail, userName, keyStatus, subscription }:
                                         <h4 className="font-bold mb-2">Basic</h4>
                                         <p className="text-2xl font-bold mb-4">$2<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                                         <ul className="text-sm space-y-2 mb-4">
-                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> 200 Prompts/mo</li>
+                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> 50 Prompts/mo</li>
                                             <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> More Patterns</li>
                                         </ul>
                                     </div>
 
-                                    {/* Pro Plan */}
-                                    <div className={`p-4 rounded-lg border ${subscription.tierName === 'Pro' ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                                        <h4 className="font-bold mb-2">Pro</h4>
+                                    {/* Premium Plan */}
+                                    <div className={`p-4 rounded-lg border ${subscription.tierName === 'Premium' ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                                        <h4 className="font-bold mb-2">Premium</h4>
                                         <p className="text-2xl font-bold mb-4">$5<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                                         <ul className="text-sm space-y-2 mb-4">
-                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> 600 Prompts/mo</li>
+                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> 150 Prompts/mo</li>
                                             <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> All Patterns</li>
-                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> BYOK Fallback</li>
+                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> BYOK Priority Access</li>
                                         </ul>
                                     </div>
                                 </div>

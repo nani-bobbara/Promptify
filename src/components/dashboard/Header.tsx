@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { 
-    Menu, 
-    Settings, 
-    LogOut, 
-    Bell, 
+import {
+    Menu,
+    Settings,
+    LogOut,
+    Bell,
     ChevronRight,
     Sparkles,
     Sun,
@@ -71,7 +71,6 @@ export function Header({ userInfo }: HeaderProps) {
     const quotaUsed = userInfo.quotaUsed || 0;
     const quotaLimit = userInfo.quotaLimit || 50;
     const remaining = quotaLimit - quotaUsed;
-    const usagePercent = Math.min((quotaUsed / quotaLimit) * 100, 100);
 
     // Build breadcrumb
     const currentPage = breadcrumbLabels[pathname] || "Dashboard";
@@ -101,8 +100,8 @@ export function Header({ userInfo }: HeaderProps) {
 
             {/* Breadcrumb */}
             <nav className="flex items-center gap-1.5 text-sm">
-                <Link 
-                    href="/dashboard" 
+                <Link
+                    href="/dashboard"
                     className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 >
                     <Home className="w-4 h-4" />
@@ -169,9 +168,9 @@ export function Header({ userInfo }: HeaderProps) {
                                 <span className="text-muted-foreground">{remaining} credits left</span>
                             </div>
                         </div>
-                        
+
                         <DropdownMenuSeparator className="my-1" />
-                        
+
                         {/* Theme Submenu */}
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger className="rounded-lg">
@@ -188,21 +187,21 @@ export function Header({ userInfo }: HeaderProps) {
                             </DropdownMenuSubTrigger>
                             <DropdownMenuPortal>
                                 <DropdownMenuSubContent className="min-w-[140px]">
-                                    <DropdownMenuItem 
+                                    <DropdownMenuItem
                                         onClick={() => setTheme("light")}
                                         className={cn("rounded-lg", theme === "light" && "bg-muted")}
                                     >
                                         <Sun className="mr-2 h-4 w-4" />
                                         Light
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem 
+                                    <DropdownMenuItem
                                         onClick={() => setTheme("dark")}
                                         className={cn("rounded-lg", theme === "dark" && "bg-muted")}
                                     >
                                         <Moon className="mr-2 h-4 w-4" />
                                         Dark
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem 
+                                    <DropdownMenuItem
                                         onClick={() => setTheme("system")}
                                         className={cn("rounded-lg", theme === "system" && "bg-muted")}
                                     >
@@ -219,11 +218,11 @@ export function Header({ userInfo }: HeaderProps) {
                                 Settings
                             </Link>
                         </DropdownMenuItem>
-                        
+
                         <DropdownMenuSeparator className="my-1" />
-                        
-                        <DropdownMenuItem 
-                            onClick={handleSignOut} 
+
+                        <DropdownMenuItem
+                            onClick={handleSignOut}
                             className="rounded-lg text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
                         >
                             <LogOut className="mr-2 h-4 w-4" />
