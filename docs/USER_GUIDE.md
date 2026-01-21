@@ -1,20 +1,21 @@
 # PromptGen User Guide
 
-Welcome to PromptGen! This guide will help you get started and make the most of the platform.
+Welcome to PromptGen! This guide will help you get started and make the most of the professional AI prompt workspace.
 
-## Getting Started
-1. **Sign Up / Log In**: Use your email to create an account or log in.
-2. **Choose a Blueprint**: Select from dynamic templates for different AI tasks.
-3. **Customize Parameters**: Adjust sliders, selects, and styles as needed.
-4. **Generate Prompt**: Click to generate and view your AI-ready prompt.
+## 🚀 The Generation Flow
+1. **Blueprint Selection**: Choose a template (e.g., "Photography", "Copywriting") that matches your goal.
+2. **Configure Parameters**: Use the sliders (e.g., "Chaos", "Stylize") and dropsdowns to fine-tune the AI's behavior.
+3. **Select a Signature**: Apply a "Visual Signature" (e.g., Cinematic, Cyberpunk) to instantly inject a specific aesthetic into the prompt.
+4. **Choose your Model**: Pick between Gemini or OpenAI models depending on your available quota.
 
-## Features
-- **History**: All generated prompts are saved for easy access.
-- **BYOK**: Add your own API key for unlimited usage after quota is reached.
-- **Subscription Tiers**: Upgrade for higher limits and advanced features.
+## 💎 Features
+- **Prompt History**: All generated prompts are saved indefinitely (for Pro users) or 7 days (for Basic users).
+- **BYOK (Bring Your Own Key)**: Add your own Gemini/OpenAI API key in **Settings** to unlock unlimited generations without using platform credits.
+- **Dynamic Formatting**: Prompts are exported in a structured format, compatible with Midjourney, DALL·E 3, and raw LLM contexts.
 
-## Tips
-- Use the Settings page to manage API keys and subscription.
-- Explore different templates for best results with each AI model.
+## 💡 Expert Tips
+- **Settings Page**: Use the "Quota Monitor" in Settings to track your monthly usage.
+- **BYOK Toggle**: Once a key is added, you can toggle "Use Personal Key by Default" in Settings to preserve your subscription quota.
 
-For more details, see the [Developer Architecture Guide](ARCHITECTURE.md).
+---
+*For technical support, check the [Architecture Guide](ARCHITECTURE.md).*

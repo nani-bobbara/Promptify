@@ -1,43 +1,41 @@
-# PromptGen: AI Prompt Engineering Made Simple 🚀
+# PromptGen: Pro-Level AI Prompt Engineering 🚀
 
-PromptGen is a professional prompt engineering workspace that converts simple concepts into high-fidelity AI instructions for Midjourney, DALL·E 3, and Marketing workflows.
+PromptGen is a professional prompt engineering workspace designed to convert creative concepts into high-fidelity AI instructions for Midjourney, DALL·E 3, and complex LLM workflows.
 
-## 📁 Repository Overview
-This repository contains the full-stack PromptGen application, integrated with Supabase and Stripe.
+## 📁 Repository Architecture
+This project is a unified Next.js + Supabase application, optimized for serverless deployment on Vercel.
 
-- **`/src`**: Next.js 14 Frontend, Server Actions, and API Routes.
-- **`/supabase`**: Database Schema, Migrations, and Configuration.
-- **`/public`**: Static assets and public resources.
-- **`/docs`**: Comprehensive architecture and deployment guides.
+- **`/src`**: Next.js 14 App Router (Frontend, Server Actions & API Routes).
+- **`/supabase`**: Consolidated PostgreSQL Schema, Migrations, and RLS policies.
+- **`/docs`**: Technical architecture and deployment guides.
 
-## 🛠️ Features
-- **Dynamic Parameters**: Every template has its own unique slider and select controls.
-- **Visual Signatures**: Curated art styles (Cyberpunk, Cinematic, etc.).
-- **Tiered Access**: Free ($0), Basic ($2), and Pro ($5) subscription plans.
-- **BYOK Support**: Unlimited usage via personal API key fallback.
-- **Searchable History**: Automatic retention of all generated prompts.
+## 🛠️ Core Capabilities
+- **Dynamic Configuration**: UI automatically morphs based on database-driven `supported_templates` and `supported_ai_models`.
+- **Hybrid Quotas**: Seamlessly switches between **System API Keys** (platform quota) and **User BYOK** (unlimited usage) based on tier limits.
+- **Transactional Billing**: Secure Stripe integration with dual-interval (Monthly/Yearly) support.
+- **Realtime Sync**: Instant UI notification of subscription status and prompt completion.
+- **Data Governance**: Automated daily cleanup of expired prompt history via `pg_cron`.
 
 ## 🚀 Getting Started
 
-> **⚠️ Important**: For detailed setup, environment variables, and Stripe configuration, please refer to the **[Deployment Guide](docs/DEPLOYMENT.md)**.
+> **⚠️ Setup Required**: For detailed instructions on environment variables, Stripe setup, and database initialization, please refer to the **[Deployment Guide](docs/DEPLOYMENT.md)**.
 
 ### Quick Start
 1.  **Clone & Install**:
     ```bash
-    git clone <repo-url>
-    cd promptify
+    git clone https://github.com/nani-bobbara/PG3.git
     npm install
     ```
-2.  **Setup Environment**: See [Deployment Guide](docs/DEPLOYMENT.md) for `.env.local` template.
-3.  **Run Locally**:
+2.  **Environment**: Create a `.env.local` based on the [Deployment Guide](docs/DEPLOYMENT.md).
+3.  **Run Development**:
     ```bash
     npm run dev
     ```
 
-## 📖 Documentation
-- [Deployment & Configuration](docs/DEPLOYMENT.md) — **Single Source of Truth** for setup.
-- [Architecture Guide](docs/ARCHITECTURE.md) — Technical details (RLS, Flows).
-- [User Guide](docs/USER_GUIDE.md) — End-user manual.
+## 📖 Deep Dive Documentation
+- [Architecture & AI Governance](docs/ARCHITECTURE.md) — Technical details (BYOK, RLS, Webhooks).
+- [Deployment Guide](docs/DEPLOYMENT.md) — Step-by-step setup instructions.
+- [User Guide](docs/USER_GUIDE.md) — Feature walkthrough for end-users.
 
 ## ⚖️ License
-MIT
+MIT - Created by the PROMPTIFY Engineering Team.

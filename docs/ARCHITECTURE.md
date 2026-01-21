@@ -67,7 +67,17 @@ The core logic is stored in a **single consolidated migration file** (`202601200
 
 ## 4. Application Logic
 
-### 4.1 Prompt Generation Flow (BYOK Fallback)
+### 4.1 Prompt Generation & AI Governance
+The generation logic handles provider-agnostic routing and strict quota enforcement.
+
+#### BYOK (Bring Your Own Key) Implementation
+- **Security**: User API keys are stored in `user_api_keys`. They are encrypted at rest using PostgreSQL **PGCrypto** (AES-256) and are never accessible to the client or leaked in logs.
+- **Routing Logic**:
+    1.  Frontend sends `model_id` and prompt parameters to the `generatePrompt` Server Action.
+    2.  The system identifies the provider (Gemini/OpenAI) using the `supported_ai_models` table.
+    3.  If the user is within their tier's monthly quota, the **System API Key** (env var) is used.
+    4.  If the quota is exceeded, the system attempts to decrypt and use the user's **BYOK Key**.
+    5.  Full history, including input tokens and output text, is saved to `user_prompts`.
 
 ```mermaid
 sequenceDiagram
@@ -76,49 +86,51 @@ sequenceDiagram
     participant DB as Supabase DB
     participant AI as AI Provider (Gemini/OpenAI)
 
-    U->>SA: Submit Prompt Request
-    SA->>DB: Check Tier & Monthly Quota
+    U->>SA: Submit Prompt Request (model_id)
+    SA->>DB: Fetch model config & user usage
+    SA->>DB: Check Tier Quota
     alt Quota Available
         SA->>AI: Call with Platform API Key
     else Quota Exceeded
-        SA->>DB: Fetch Encrypted User API Key
+        SA->>DB: Decrypt User BYOK Key (PGCrypto)
         alt BYOK Key Exists
             SA->>AI: Call with User's API Key
         else No Key
-            SA-->>U: Error: Prompt Limit Reached
+            SA-->>U: Error: Limit Reached (BYOK Required)
         end
     end
     AI-->>SA: Response Received
-    SA->>DB: Log Prompt to History & Update Usage
-    SA-->>U: Display Result
+    SA->>DB: Update usage_count & save history
+    SA-->>U: Display formatted result
 ```
 
 ### 4.2 Monetization & Billing (Stripe Sync)
-
 The application uses a "Webhooks-as-Sync" pattern. While checkout is initiated on the frontend, the database is updated asynchronously via Stripe events to ensure reliability.
+
+#### Bypassing RLS for Webhooks
+Because Stripe webhooks originate from outside the user's browser session, they do not carry a Supabase Auth token. To allow these background processes to update `user_subscriptions`, we use a **Supabase Admin Client** ([admin.ts](file:///src/lib/supabase/admin.ts)) initialized with the `SERVICE_ROLE_KEY`.
 
 ```mermaid
 sequenceDiagram
     participant S as Stripe
     participant N as Next.js Webhook Route
     participant SS as StripeService.ts
-    participant DB as Supabase DB
+    participant DB as Supabase DB (Admin)
 
     S->>N: POST (Billing Event)
     N->>N: Verify Stripe Signature
     N->>SS: Process Event (e.g. subscription.updated)
-    SS->>DB: Sync status/quota to user_subscriptions
-    SS->>DB: [Optional] Update prices in subscription_tiers
+    SS->>DB: Upsert record via Admin Client (Bypass RLS)
     N-->>S: 200 OK
 ```
 
 ---
 
 ## 5. Maintenance & Scalability
-
-- **Realtime Updates**: `user_subscriptions` and `user_prompts` have Realtime enabled, allowing the UI to react instantly to payment success or background generation.
-- **Automated Purge**: A `pg_cron` job runs daily at 3:00 AM to delete user prompts that exceed their tier's `retention_days`.
-- **Connection Pooling**: Uses **Supavisor** via the transaction URL for handling high concurrency across serverless functions.
+- **Dynamic Scaffolding**: New blueprints and models added to the database are instantly reflected in the UI without a redeploy.
+- **Realtime Updates**: Uses Supabase Realtime to push subscription status changes to the frontend without a page refresh.
+- **Automated Purge**: A `pg_cron` job runs daily at 3:00 AM to enforce tier-based data retention.
 
 ---
-*Last Updated: 2026-01-21*
+*Documented for the PROMPTIFY Engineering Team.*
+*Last Updated: 2026-01-21 09:45 AM*
