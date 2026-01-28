@@ -217,11 +217,12 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
 
 INSERT INTO public.subscription_tiers (id, name, description, monthly_price_in_cents, yearly_price_in_cents, monthly_quota, retention_days, is_default, features, stripe_product_id, stripe_monthly_price_id, stripe_yearly_price_id) VALUES
 ('free', 'Free', 'Perfect for hobbyists.', 0, 0, 50, 30, true, '["50 prompts/month", "30-day history"]'::jsonb, NULL, NULL, NULL),
-('basic', 'Basic', 'For consistent creators.', 2000, 0, 200, 60, false, '["200 prompts/month", "60-day history"]'::jsonb, 'prod_TpECeLNea3s1D3', 'price_1SrZkZDf8eZbtpDlrhlgqfDx', NULL),
-('pro', 'Pro', 'For power users.', 5000, 0, 600, 90, false, '["600 prompts/month", "90-day history"]'::jsonb, 'prod_TpEGwSM4LTIWIc', 'price_1SrZniDf8eZbtpDlHBvamE79', NULL)
+('basic', 'Basic', 'For consistent creators.', 299, 2999, 200, 60, false, '["200 prompts/month", "60-day history"]'::jsonb, 'prod_TpECeLNea3s1D3', 'price_1SrZkZDf8eZbtpDlrhlgqfDx', 'price_1SrZlsDf8eZbtpDlmal62TkW'),
+('pro', 'Pro', 'For power users.', 499, 4999, 600, 90, false, '["600 prompts/month", "90-day history"]'::jsonb, 'prod_TpEGwSM4LTIWIc', 'price_1SrZniDf8eZbtpDlHBvamE79', 'price_1SrZpEDf8eZbtpDlh6Thx3KB')
 ON CONFLICT (id) DO UPDATE SET
-    stripe_product_id = EXCLUDED.stripe_product_id,
-    stripe_monthly_price_id = EXCLUDED.stripe_monthly_price_id;
+  stripe_product_id = EXCLUDED.stripe_product_id,
+  stripe_monthly_price_id = EXCLUDED.stripe_monthly_price_id,
+  stripe_yearly_price_id = EXCLUDED.stripe_yearly_price_id;
 
 INSERT INTO public.supported_ai_models (model_id, name, provider, description, endpoint, env_key, is_default) VALUES
 (
